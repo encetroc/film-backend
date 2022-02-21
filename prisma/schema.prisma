@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["mongoDb"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Movie {
+  id                  String                @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  title               String
+  shareholders        Shareholder[]
+  transfers           Transfer[]
+  ShareholderTransfer ShareholderTransfer[]
+}
+
+model Shareholder {
+  id                  String                @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  firstName           String
+  lastName            String
+  address             String
+  IBAN                String
+  movie               Movie                 @relation(fields: [movieId], references: [id])
+  movieId             String                @db.ObjectId
+  ShareholderTransfer ShareholderTransfer[]
+}
+
+model Transfer {
+  id          String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  amount      Float
+  description String
+  movie       Movie  @relation(fields: [movieId], references: [id])
+  movieId     String @db.ObjectId
+}
+
+model ShareholderTransfer {
+  id            String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  amount        Float
+  movie         Movie       @relation(fields: [movieId], references: [id])
+  shareholder   Shareholder @relation(fields: [shareholderId], references: [id])
+  movieId       String      @db.ObjectId
+  shareholderId String      @db.ObjectId
+}
